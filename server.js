@@ -36,7 +36,7 @@ app.post('/api/todos', async (req, res) => {
 
         const [todosResult] = await connection.query(getTodoById, [result.insertId]);
 
-        res.json(todosResult);
+        res.json(todosResult[0]);
 
     } catch(e) {
         res.status(400).json(e);
