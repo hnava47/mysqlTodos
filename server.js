@@ -42,7 +42,7 @@ app.post('/api/users', async (req, res) => {
 
 app.get('/api/todos', async (req, res) => {
     try {
-        const getAllTodosQuery = 'SELECT * FROM todos;';
+        const getAllTodosQuery = 'SELECT td.id, td.task, td.completed, td.date_created, us.username FROM todos td LEFT JOIN users us ON td.userId = us.id;';
         const [todos] = await connection.query(getAllTodosQuery);
         res.json(todos);
     } catch (e) {
@@ -54,7 +54,7 @@ app.get('/api/todos', async (req, res) => {
 // async await
 // Declaring a function as "async" allows us to use "await" syntax inside the function
 app.post('/api/todos', async (req, res) => {
-    const {task} = req.body;
+    const {task, userId} = req.body;
 
     // If the user does not provide a task, respond with an error
     if (!task) {
@@ -62,11 +62,11 @@ app.post('/api/todos', async (req, res) => {
     }
 
     try {
-        const insertQuery = 'INSERT INTO todos(task) VALUES(?);';
+        const insertQuery = 'INSERT INTO todos(task, userId) VALUES(?,?);';
         const getTodoById = 'SELECT * FROM todos WHERE id = ?;';
 
         // Destructure the mysql result to only get first index only
-        const [result] = await connection.query(insertQuery, [task]);
+        const [result] = await connection.query(insertQuery, [task, userId]);
 
         // Whenever we do an INSERT, UPDATE, or DELETE query in mysql2 or mysql npm package
         // it doesn't give us the data that was interacted with, it instead tells us information
