@@ -26,7 +26,7 @@ app.post('/api/users', async (req, res) => {
         const [userResult] = await connection.query(getUserById, [result.insertId]);
         res.json(userResult[0]);
     } catch (e) {
-        res.status(404).json(e);
+        res.status(400).json(e);
     }
 });
 
