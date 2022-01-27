@@ -32,8 +32,8 @@ app.post('/api/users', async (req, res) => {
         const createUserQuery = 'INSERT INTO users(username) VALUES(?);';
         const getUserById = 'SELECT * FROM users WHERE id = ?;';
 
-        const [result] = await connection.query(createUserQuery, [username]);
-        const [userResult] = await connection.query(getUserById, [result.insertId]);
+        const [result] = await connection.query(createUserQuery, username);
+        const [userResult] = await connection.query(getUserById, result.insertId);
         res.json(userResult[0]);
     } catch (e) {
         res.status(400).json(e);
@@ -74,14 +74,53 @@ app.post('/api/todos', async (req, res) => {
         // It also gives us an array with 2 elements. The 1st one is an object where we have the information we need
         // 2nd one is null or information about the fields of that row
 
-        const [todosResult] = await connection.query(getTodoById, [result.insertId]);
+        const [todosResult] = await connection.query(getTodoById, result.insertId);
 
         res.json(todosResult[0]);
 
     } catch (e) {
         res.status(400).json(e);
     }
+});
 
+app.patch('/api/todos/:todoId', async (req, res) => {
+    const {todoId} = req.params;
+    const {task, completed} = req.body;
+
+    if (!task || !completed) {
+        return res.status(400).json({error: 'You must provide the task and completed'});
+    }
+
+    try {
+        const updateTodoById = 'UPDATE todos SET task = ?, completed = ? WHERE id = ?;';
+        const getTodoById = 'SELECT * FROM todos WHERE id = ?;';
+        const isCompleted = completed.toLowerCase() === 'true' ? 1 : 0;
+        await connection.query(updateTodoById, [task, isCompleted, todoId]);
+        const [todos] = await connection.query(getTodoById, todoId);
+
+        res.json(todos[0]);
+    } catch (e) {
+        res.status(400).json(e);
+    }
+});
+
+app.delete('/api/todos/:todoId', async (req, res) => {
+    const {todoId} = req.params;
+
+    try {
+        const getTodoById = 'SELECT * FROM todos WHERE id = ?;';
+        const deleteTodoById = 'DELETE FROM todos WHERE id = ?;';
+        const [todos] = await connection.query(getTodoById, todoId);
+
+        if (!todos[0]) {
+            return res.status(404).json({error: 'Todo not found'});
+        }
+
+        await connection.query(deleteTodoById, todoId);
+        res.json(todos[0]);
+    } catch (e) {
+        res.status(400).json(e);
+    }
 });
 
 app.listen(PORT, () => console.log(`Server listening on port: ${PORT}`));
