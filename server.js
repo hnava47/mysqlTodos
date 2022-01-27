@@ -9,6 +9,7 @@ const app = express();
 // Makes req.body exist
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(express.static('public'));
 
 // User API's
 app.get('/api/users', async (req, res) => {
