@@ -64,7 +64,7 @@ app.post('/api/todos', async (req, res) => {
 
     try {
         const insertQuery = 'INSERT INTO todos(task, userId) VALUES(?,?);';
-        const getTodoById = 'SELECT * FROM todos WHERE id = ?;';
+        const getTodoById = 'SELECT * FROM todos td, users us WHERE td.userId = us.id AND td.id = ?;';
 
         // Destructure the mysql result to only get first index only
         const [result] = await connection.query(insertQuery, [task, userId]);
@@ -75,7 +75,7 @@ app.post('/api/todos', async (req, res) => {
         // It also gives us an array with 2 elements. The 1st one is an object where we have the information we need
         // 2nd one is null or information about the fields of that row
 
-        const [todosResult] = await connection.query(getTodoById, result.insertId);
+        const [todosResult] = await connection.query(getTodoById, [result.insertId]);
 
         res.json(todosResult[0]);
 
