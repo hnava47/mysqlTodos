@@ -11,6 +11,16 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // User API's
+app.get('/api/users', async (req, res) => {
+    try {
+        const getAllUsersQuery = 'SELECT * FROM users;';
+        const [users] = await connection.query(getAllUsersQuery);
+        res.json(users);
+    } catch (e) {
+        res.status(400).json(e);
+    }
+});
+
 app.post('/api/users', async (req, res) => {
     const {username} = req.body;
 
